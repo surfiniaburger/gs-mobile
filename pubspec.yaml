@@ -1,0 +1,58 @@
+name: firebase_auth_flutterfire_ui
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.15.1
+  firebase_auth: ^5.6.2
+  firebase_ui_auth: ^1.17.0
+  google_sign_in: ^6.3.0
+  firebase_ui_oauth_google: ^1.4.2
+  web_socket_channel: ^3.0.3
+  camera: ^0.11.1
+  flutter_sound: ^9.28.0
+  permission_handler: ^12.0.1
+  just_audio: ^0.10.4
+  animated_background: ^2.0.0
+  flutter_animate: ^4.5.2
+  rive: ^0.12.0
+  lottie: ^2.7.0
+  google_maps_flutter: ^2.12.3
+  http: ^1.4.0
+  json_annotation: ^4.9.0
+  json_serializable: ^6.9.5
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.5.4
+  flutter_launcher_icons: "^0.13.1"
+  flutter_native_splash: ^2.4.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/hub.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21 # android min sdk min:16, default 21
+
+flutter_native_splash:
+  color: "#0a192f" # Matches your app's dark theme
+  image: assets/splash/stream.png
+  android: true
+  ios: true
+  web: false
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
