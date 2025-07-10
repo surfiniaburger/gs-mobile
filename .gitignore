@@ -51,3 +51,8 @@ app.*.map.json
 
 # Android Studio will place build artifacts here
 /android/app/build/
+
+**/AndroidManifest.xml
+/android/app/src/main/AndroidManifest.xml
+/android/app/src/debug/AndroidManifest.xml
+/android/key.properties

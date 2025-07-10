@@ -9,3 +9,5 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+/android/app/src/main/AndroidManifest.xml
+/android/app/src/debug/AndroidManifest.xml
