@@ -19,7 +19,7 @@ The app dynamically parses these locations from messages, geocodes them, and vis
 
 | Auth Screen | Chat Interface | Map View |
 | :---: |:---:|:---:|
-| ![Auth Screen](screenshots/pic_4.png) | ![Chat Interface](screenshots/pic_2.png) | ![Map View](screenshots/pic_3.png) |
+| ![Auth Screen](assets/pic_4.png) | ![Chat Interface](assets/pic_2.png) | ![Map View](assets/pic_3.png) |
 
 ## 🛠️ Tech Stack & Key Packages
 
