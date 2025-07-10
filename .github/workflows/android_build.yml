@@ -46,7 +46,7 @@ jobs:
 
       # Step 6: Build the Android App Bundle (AAB) for release
       - name: Build Android App Bundle
-        run: flutter build appbundle --release
+        run: flutter build appbundle --debug -v
 
       # Step 7: Upload the build artifact so you can download it
       - name: Upload App Bundle
