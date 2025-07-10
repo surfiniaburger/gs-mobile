@@ -1,0 +1,56 @@
+# This workflow builds a signed Android App Bundle when code is pushed to the main branch.
+name: Build Flutter Android
+
+on:
+  push:
+    branches:
+      - main # Triggers the workflow on push events to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository so the workflow can access your code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the Java environment (required for Android builds)
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Step 3: Set up the Flutter SDK
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # Step 4: Get Flutter dependencies
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      # Step 5: Decode the keystore and create the key.properties file from secrets
+      - name: Decode Keystore and Setup Properties
+        # This step is conditional and only runs if the secrets are available.
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        run: |
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=release-keystore.jks" >> android/key.properties
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
+
+      # Step 6: Build the Android App Bundle (AAB) for release
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      # Step 7: Upload the build artifact so you can download it
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-app-bundle
+          path: build/app/outputs/bundle/release/app-release.aab
