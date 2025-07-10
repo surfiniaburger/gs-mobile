@@ -36,7 +36,7 @@ jobs:
       # Step 5: Decode the keystore and create the key.properties file from secrets
       - name: Decode Keystore and Setup Properties
         # This step is conditional and only runs if the secrets are available.
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        if: secrets.KEYSTORE_BASE64 != ''
         run: |
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
