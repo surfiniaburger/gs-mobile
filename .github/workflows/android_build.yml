@@ -43,7 +43,10 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=release-keystore.jks" >> android/key.properties
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release-keystore.jks
-
+          
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        
       # Step 6: Build the Android App Bundle (AAB) for release
       - name: Build Android App Bundle
         run: flutter build appbundle --debug -v
