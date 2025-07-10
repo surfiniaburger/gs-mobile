@@ -159,54 +159,80 @@ class _HomeScreenState extends State<HomeScreen> {
             print("--- 🕵️ DEBUG: Final chunk received. Analyzing message... ---");
             print("--- LAST MESSAGE: ---\n$rawMessageText\n--------------------");
 
-          // --- FIX STARTS HERE ---
-          // 1. Create a sanitized string for JSON parsing.
-          // This function removes the common markdown fences ```json ... ```
-          // as well as any leading/trailing whitespace.
-          String sanitizedJsonString = rawMessageText
-              .replaceAll('```json', '')
-              .replaceAll('```', '')
-              .trim();
+            // --- NEW, MORE ROBUST PARSING LOGIC ---
+            bool processedJson = false;
 
-          // 2. Try to parse the SANITIZED string.
-          try {
-            final decodedData = json.decode(sanitizedJsonString) as Map<String, dynamic>;
-            final spokenResponse = decodedData['spoken_response'] as String?;
-            final mapData = decodedData['map_data'] as List<dynamic>?;
+            // Regex to find a JSON object `{...}` or array `[...]` that might be embedded in text.
+            // It's greedy and handles nested structures. It also handles optional markdown ```json ... ``` fences.
+            final jsonRegex = RegExp(r'```json\s*([\s\S]*?)\s*```|(\{[\s\S]*\})|(\[[\s\S]*\])', dotAll: true);
+            final match = jsonRegex.firstMatch(rawMessageText);
 
-            if (spokenResponse != null && mapData != null) {
-              print("--- ✅ DEBUG: Parsed structured JSON response with spoken_response and map_data. ---");
-              // Update the chat bubble to only show the conversational text
-              lastMessage.text = spokenResponse;
+            if (match != null) {
+              // Group 1 is for ```json ... ```, Group 2 for {...}, Group 3 for [...]
+              final jsonString = (match.group(1) ?? match.group(2) ?? match.group(3))?.trim();
+              if (jsonString != null) {
+                try {
+                  final decodedData = json.decode(jsonString);
+                  List<ParsedLocation>? locations;
 
-              final locations = mapData.map((item) {
-                return ParsedLocation(
-                  name: item['name'] as String? ?? 'Unknown Name',
-                  address: item['address'] as String? ?? 'No address provided',
-                  rating: (item['rating'] as num?)?.toDouble() ?? 0.0,
-                );
-              }).toList();
+                  if (decodedData is Map<String, dynamic> && decodedData.containsKey('map_data')) {
+                    final spokenResponse = decodedData['spoken_response'] as String?;
+                    final mapData = decodedData['map_data'] as List<dynamic>?;
 
-              if (locations.isNotEmpty) {
-                setState(() => _showMapToggle = true);
-                _handleLocationResponse(locations);
+                    if (mapData != null) {
+                      print("--- ✅ DEBUG: Parsed structured JSON object with 'map_data'. ---");
+                      
+                      // Use the spoken response if available, otherwise use the text before the JSON.
+                      final conversationalText = spokenResponse ?? rawMessageText.substring(0, match.start).trim();
+                      if (conversationalText.isNotEmpty) {
+                        lastMessage.text = conversationalText;
+                      }
+
+                      locations = mapData.map((item) => ParsedLocation(
+                          name: item['name'] as String? ?? 'Unknown',
+                          address: item['address'] as String? ?? 'No address',
+                          rating: (item['rating'] as num?)?.toDouble() ?? 0.0,
+                      )).toList();
+                    }
+                  } else if (decodedData is List) {
+                    print("--- ✅ DEBUG: Parsed a raw JSON array of locations. ---");
+                    locations = decodedData.map((item) {
+                      if (item is Map<String, dynamic>) {
+                        return ParsedLocation(
+                          name: item['name'] as String? ?? 'Unknown',
+                          address: item['address'] as String? ?? 'No address',
+                          rating: (item['rating'] as num?)?.toDouble() ?? 0.0,
+                        );
+                      }
+                      return null;
+                    }).whereType<ParsedLocation>().toList();
+                    
+                    // Display the text that came *before* the JSON.
+                    final conversationalText = rawMessageText.substring(0, match.start).trim();
+                    if (conversationalText.isNotEmpty) {
+                      lastMessage.text = conversationalText;
+                    }
+                  }
+
+                  if (locations != null && locations.isNotEmpty) {
+                    setState(() => _showMapToggle = true);
+                    _handleLocationResponse(locations);
+                    processedJson = true;
+                  }
+                } catch (e) {
+                  print("--- ⚠️ DEBUG: Found a JSON-like block but failed to parse. Error: $e ---");
+                }
               }
-            } else {
-              // The JSON was valid but didn't have our expected map keys.
-              // Fallback to text parsing for other potential data formats.
+            }
+
+            if (!processedJson) {
+              print("--- ℹ️ DEBUG: No valid JSON block found. Falling back to text parsing. ---");
               _fallbackToTextParsing(rawMessageText);
             }
-          } catch (e) {
-            // 3. If parsing the sanitized string STILL fails, it's not the JSON
-            // format we're looking for. Fall back to the original text parsing logic.
-            print("--- ⚠️ DEBUG: Failed to parse as structured JSON. Falling back to text parsing. Error: $e ---");
-            _fallbackToTextParsing(rawMessageText);
           }
-          // --- FIX ENDS HERE ---
-        }
-      });
-      _scrollToBottom();
-    },
+        });
+        _scrollToBottom();
+      },
       onError: (error) {
         if (mounted) {
           if (_isConnected) {
@@ -236,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() => _showMapToggle = true);
       _handleLocationResponse(locations);
     }
-}
+  }
 
   void _sendMessage() {
     if (_messageController.text.isNotEmpty && _channel != null && _isConnected) {
