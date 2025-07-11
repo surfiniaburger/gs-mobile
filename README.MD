@@ -108,3 +108,8 @@ flutter run
 ### 🔌 Backend Note
 
 The chat functionality in this app is designed to connect to a WebSocket server at `wss://app.galactic-streamhub.com/ws`. This server is responsible for processing user messages (including location context) and sending back responses, which may contain the location data that the app visualizes. To experience the full functionality, a compatible backend service is required.
+
+For Mac
+```bash
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
+```
