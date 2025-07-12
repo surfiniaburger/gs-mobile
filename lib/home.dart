@@ -46,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _retryCount = 0;
   static const int _maxRetries = 5;
   static const double _initialReconnectDelay = 2.0;
+  static const LatLng _defaultInitialPosition = LatLng(6.5244, 3.3792); // Lagos, Nigeria
 
   // --- NEW State Variables for the Map ---
   bool _showMapToggle = false;
@@ -607,7 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
           ),
           const SizedBox(height: 12),
-          Expanded(
+          Flexible(
             child: _isConnected
                 ? ListView.builder(
                     controller: _scrollController,
@@ -694,8 +695,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           initialCameraPosition: CameraPosition(
             target: _currentUserPosition != null
-                ? LatLng(_currentUserPosition!.latitude, _currentUserPosition!.longitude)
-                : const LatLng(6.5244, 3.3792), // Default to Lagos, Nigeria
+                ? LatLng(_currentUserPosition!.latitude, _currentUserPosition!.longitude) : _defaultInitialPosition,
             zoom: 12,
           ),
           markers: _markers,
@@ -780,3 +780,4 @@ class ChatMessage {
 
   ChatMessage({required this.text, required this.sender});
 }
+
